@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Layout from "./component/layout";
 import { useSession } from "next-auth/react";
@@ -7,12 +7,13 @@ export default function Home() {
   return (
     <Layout>
       <div className="flex justify-between">
-        <h2>Hello <b>{session?.user?.name}</b> </h2>
+        <h2>
+          Hello <b>{session?.user?.name}</b>{" "}
+        </h2>
         <div className="bg-gray-300 p-1 px-2 rounded-lg hover:bg-gray-400 cursor-pointer">
-            {session?.user?.name}
+          {session?.user?.name}
         </div>
       </div>
     </Layout>
   );
-
 }

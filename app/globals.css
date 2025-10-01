@@ -10,11 +10,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-primary: #5542F6;
-  --color-highlight: #EAE8FB;
-
+  --color-primary: #5347d6;
+  --color-highlight: #eae8fb;
 }
-
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -29,42 +27,45 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-input, textarea, select{
-  @apply border-2 border-blue-900 rounded-md p-2 w-full;
+input,
+textarea,
+select {
+  @apply border-2 border-primary rounded-md p-2 w-full;
+  @apply shadow-md;
   margin-bottom: 10px;
 }
 
-input:focus textarea:focus select:focus{
-  @apply border-blue-900;
+input:focus textarea:focus select:focus {
+  @apply border-primary;
 }
 
 h1 {
-  @apply text-blue-900 mb-2 text-xl;
+  @apply text-gray-800 mb-2 text-xl;
 }
 
 label {
-  @apply text-blue-700;
+  @apply text-gray-800;
 }
-
 
 table.basic {
-  @apply w-full;
+  @apply w-full rounded-sm shadow-md shadow-md;
 }
 
-table.basic thead{
-  @apply bg-blue-300 ;
-}
-
-table.basic thead td{
-  @apply border border-gray-500 border-solid;
+table.basic thead tr,
+table.basic thead th {
+  @apply border-b border-gray-500 px-4 py-2;
 }
 
 table.basic tbody tr td {
-  @apply border border-gray-500 border-solid p-2;
+  @apply text-sm uppercase border-b border-gray-500 px-4 py-2;
+}
+
+table.basic tr td {
+  @apply px-4 py-1;
 }
 
 .btn-default {
-  @apply bg-gray-800 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-gray-900;
+  @apply bg-white text-gray-600 border-2 border-gray-200 px-4 py-2 rounded-md cursor-pointer hover:bg-gray-200 items-center;
 }
 
 .btn-warning {
@@ -72,6 +73,9 @@ table.basic tbody tr td {
 }
 
 .btn-primary {
-  @apply bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-800;
+  @apply bg-primary text-white px-4 py-2 rounded-md cursor-pointer hover:bg-purple-700;
 }
 
+.btn-red {
+  @apply bg-red-400 text-white px-3 rounded-md cursor-pointer hover:bg-red-800 items-center;
+}
