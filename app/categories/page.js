@@ -10,32 +10,61 @@ function Categories({ swal }) {
   const [parentCategory, setParentCategory] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
   const [properties, setProperties] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function saveCategory(e) {
     e.preventDefault();
+    if (!categoryName.trim()) {
+      await swal.fire({
+        title: "Missing name",
+        text: "Please enter a category name.",
+        icon: "info",
+      });
+      return;
+    }
+
     const data = {
-      categoryName,
+      categoryName: categoryName.trim(),
       parentCategory: parentCategory || null,
       properties: properties.map((property) => ({
-        name: property.name,
-        values: property.values.split(","),
+        name: (property.name || "").trim(),
+        values: (property.values || "")
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
       })),
     };
+
+    // Remove empty property rows
+    data.properties = data.properties.filter((p) => p.name);
+
     if (editingCategory) {
       await axios.put("/api/categories", { ...data, _id: editingCategory._id });
       setEditingCategory(null);
     } else {
       await axios.post("/api/categories", data);
     }
+
     setCategoryName("");
+    setParentCategory(null);
     setProperties([]);
-    fetchCategories();
+    await fetchCategories();
+    await swal.fire({
+      title: "Saved",
+      icon: "success",
+      timer: 1200,
+      showConfirmButton: false,
+    });
   }
 
-  function fetchCategories() {
-    axios.get("/api/categories").then((res) => {
-      setCategories(res.data.categories);
-    });
+  async function fetchCategories() {
+    setIsLoading(true);
+    try {
+      const res = await axios.get("/api/categories");
+      setCategories(res.data.categories || []);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function editCategory(category) {
@@ -43,9 +72,9 @@ function Categories({ swal }) {
     setCategoryName(category.name);
     setParentCategory(category.parentCategory?._id || null);
     setProperties(
-      category.properties.map((property) => ({
+      (category.properties || []).map((property) => ({
         name: property.name,
-        values: property.values.join(","),
+        values: (property.values || []).join(","),
       })),
     );
   }
@@ -64,9 +93,22 @@ function Categories({ swal }) {
       .then((result) => {
         if (result.isConfirmed) {
           axios
-            .delete("/api/categories/", { data: { _id: category._id } })
-            .then((res) => {
-              fetchCategories();
+            .delete("/api/categories", { data: { _id: category._id } })
+            .then(async () => {
+              await fetchCategories();
+              await swal.fire({
+                title: "Deleted",
+                icon: "success",
+                timer: 1000,
+                showConfirmButton: false,
+              });
+            })
+            .catch(async (error) => {
+              await swal.fire({
+                title: "Delete failed",
+                text: error?.response?.data?.message || "Unknown error",
+                icon: "error",
+              });
             });
         }
       });
@@ -105,12 +147,17 @@ function Categories({ swal }) {
   function cancelEditing() {
     setEditingCategory(null);
     setCategoryName("");
+    setParentCategory(null);
     setProperties([]);
   }
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const categoriesForParentSelect = editingCategory
+    ? categories.filter((c) => c._id !== editingCategory._id)
+    : categories;
 
   return (
     <Layout>
@@ -134,7 +181,7 @@ function Categories({ swal }) {
             onChange={(e) => setParentCategory(e.target.value)}
           >
             <option value="">No Parent Category</option>
-            {categories.map((category) => (
+            {categoriesForParentSelect.map((category) => (
               <option key={category._id} value={category._id}>
                 {category.name}
               </option>
@@ -200,14 +247,30 @@ function Categories({ swal }) {
             <tr>
               <td className="p-2">Category Name</td>
               <td className="p-2">Parent Category</td>
+              <td className="p-2">Properties</td>
               <td></td>
             </tr>
           </thead>
           <tbody>
+            {isLoading && (
+              <tr>
+                <td colSpan={4} className="p-4 text-gray-600">
+                  Loading...
+                </td>
+              </tr>
+            )}
             {categories.map((category) => (
               <tr key={category._id}>
                 <td>{category.name}</td>
                 <td>{category?.parentCategory?.name}</td>
+                <td className="text-gray-700">
+                  {(category.properties || []).length > 0
+                    ? (category.properties || [])
+                        .map((p) => p?.name)
+                        .filter(Boolean)
+                        .join(", ")
+                    : "-"}
+                </td>
                 <td className="w-42">
                   <div className="flex gap-2">
                     <button

@@ -9,8 +9,8 @@ export async function POST(req) {
     const { categoryName, parentCategory, properties } = await req.json();
     const categoryDoc = await Category.create({
       name: categoryName,
-      parentCategory: parentCategory,
-      properties: properties,
+      parentCategory: parentCategory || null,
+      properties: Array.isArray(properties) ? properties : [],
     });
     return Response.json({ categoryDoc }, { status: 200 });
   } catch (error) {
@@ -22,7 +22,9 @@ export async function GET(req) {
   try {
     await isAdmin();
     await connectToDatabase();
-    const categories = await Category.find().populate("parentCategory");
+    const categories = await Category.find()
+      .populate("parentCategory")
+      .sort({ updatedAt: -1 });
     return Response.json({ categories }, { status: 200 });
   } catch (error) {
     return Response.json({ message: "Error", error }, { status: 500 });
@@ -34,11 +36,15 @@ export async function PUT(req) {
     await isAdmin();
     await connectToDatabase();
     const { categoryName, parentCategory, properties, _id } = await req.json();
-    const categoryDoc = await Category.findByIdAndUpdate(_id, {
-      name: categoryName,
-      parentCategory: parentCategory,
-      properties: properties,
-    });
+    const categoryDoc = await Category.findByIdAndUpdate(
+      _id,
+      {
+        name: categoryName,
+        parentCategory: parentCategory || null,
+        properties: Array.isArray(properties) ? properties : [],
+      },
+      { new: true, runValidators: true },
+    );
     return Response.json({ categoryDoc }, { status: 200 });
   } catch (error) {
     return Response.json({ message: "Error", error }, { status: 500 });
