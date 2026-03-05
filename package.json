@@ -16,7 +16,7 @@
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "multiparty": "^4.2.3",
-    "next": "15.5.2",
+    "next": "15.5.9",
     "next-auth": "^4.24.11",
     "prettier": "^3.6.2",
     "react": "^18.2.0",
